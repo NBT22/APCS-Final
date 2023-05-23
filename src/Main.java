@@ -11,6 +11,7 @@ public class Main {
     private static int lPaddlePos = height / 3;
     private static int rPaddlePos = height / 3;
     private static int[] ballPos = new int[] {width / 2 - height / 32, height / 2 - height / 32};
+    private static double[] ballVelocity = new double[] {-10, 0};
     private static int[] score = new int[] {0, 0};
     public static void main(String[] args) {
         // Create a new window using the Swing library
@@ -45,27 +46,26 @@ public class Main {
     public static void drawScreen(JFrame frame) {
         frame.getContentPane().add(new Container() {
             public void paint(Graphics g) {
-                BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB) {
-                    {
-                        Graphics2D g = createGraphics();
-                        g.addRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
-                        g.setColor(Color.WHITE);
-                        g.setFont(g.getFont().deriveFont(70f));
+                ((Graphics2D)g).addRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
+                g.setColor(Color.WHITE);
+                g.setFont(g.getFont().deriveFont(height / 12f));
 
-                        g.fillRect(Main.width / 200, lPaddlePos, Main.width / 40, Main.height / 3);
-                        g.fillRect(Main.width - Main.width / 200 - Main.width / 40, rPaddlePos, Main.width / 40, Main.height / 3);
-                        g.fillOval(ballPos[0], ballPos[1], Main.height / 16, Main.height / 16);
-                        g.drawString(score[0] + "   –   " + score[1], Main.width / 2 - g.getFontMetrics().stringWidth(score[0] + "   –   " + score[1]) / 2, 50);
-                    }
-                };
-                g.drawImage(img, 0, 0, null);
+                g.fillRect(Main.width / 200, lPaddlePos, Main.width / 40, Main.height / 3);
+                g.fillRect(Main.width - Main.width / 200 - Main.width / 40, rPaddlePos, Main.width / 40, Main.height / 3);
+                g.fillOval(ballPos[0], ballPos[1], Main.height / 16, Main.height / 16);
+                Rectangle2D textBox = g.getFontMetrics().getStringBounds(score[0] + "   –   " + score[1], g);
+                g.drawString(score[0] + "   –   " + score[1], Main.width / 2 - textBox.getWidth() / 2, textBox.getHeight());
             }
         });
-        frame.repaint();
+    }
+    private static void updateBallPosition() {
+        ballPos[0] += (int)ballVelocity[0];
+        ballPos[1] += (int)ballVelocity[1];
     }
     public static void gameLoop(JFrame frame) {
+        drawScreen(frame);
         while (true) {
-            drawScreen(frame);
+            frame.repaint();
         }
     }
 }
