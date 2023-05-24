@@ -2,74 +2,108 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
+import java.awt.geom.Rectangle2D;
+import java.util.TimerTask;
+import java.util.Timer;
 
 public class Main {
-    private static final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    public static int width = (int)screenSize.getWidth() / 3;
-    public static int height = (int)screenSize.getHeight() / 3;
-    private static int lPaddlePos = height / 3;
-    private static int rPaddlePos = height / 3;
-    private static int[] ballPos = new int[] {width / 2 - height / 32, height / 2 - height / 32};
-    private static double[] ballVelocity = new double[] {-10, 0};
-    private static int[] score = new int[] {0, 0};
+
     public static void main(String[] args) {
-        // Create a new window using the Swing library
-        JFrame frame = new JFrame("Pong");
+        new Game();
+    }
+
+}
+
+class Game {
+    private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    public int height = (int)screenSize.getHeight();
+    public int width = (int)screenSize.getWidth();
+    private int lPaddlePos = 2 * height / 5;
+    private int rPaddlePos = 2 * height / 5;
+    private int[] ballPos = new int[] {width / 2 - height / 64, height / 2 - height / 64};
+    private double[] ballVelocity = new double[] {-5, 0};
+    private int[] score = new int[] {0, 0};
+    private JFrame frame;
+    private JPanel panel;
+    public Game() {
+        frame = new JFrame("Pong");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
         frame.pack();
         frame.setVisible(true);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.getContentPane().setBackground(Color.BLACK);
+        panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(Color.WHITE);
+                g2d.fillRect(0, lPaddlePos, height / 64, height / 5);
+                g2d.fillRect(width - height / 64, rPaddlePos, height / 64, height / 5);
+                g2d.fillOval(ballPos[0], ballPos[1], height / 32, height / 32);
+                g2d.setFont(new Font("Arial", Font.BOLD, height / 16));
+                g2d.drawString(Integer.toString(score[0]), width / 4, height / 8);
+                g2d.drawString(Integer.toString(score[1]), width * 3 / 4, height / 8);
+            }
+        };
+        panel.setBackground(Color.BLACK);
+        frame.add(panel);
         frame.addKeyListener(new KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent e) {
-                System.out.println(e.getKeyCode());
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_UP:
-                        ballPos[1] -= 10;
+                         lPaddlePos -= 10;
                         break;
                     case KeyEvent.VK_DOWN:
-                        ballPos[1] += 10;
+                        lPaddlePos += 10;
                         break;
-                    case KeyEvent.VK_LEFT:
-                        ballPos[0] -= 10;
+                    case KeyEvent.VK_PAGE_UP:
+                    case KeyEvent.VK_W:
+                        rPaddlePos -= 10;
                         break;
-                    case KeyEvent.VK_RIGHT:
-                        ballPos[0] += 10;
+                    case KeyEvent.VK_PAGE_DOWN:
+                    case KeyEvent.VK_S:
+                        rPaddlePos += 10;
                         break;
                 }
             }
         });
-        gameLoop(frame);
-    }
-    public static void drawScreen(JFrame frame) {
-        frame.getContentPane().add(new Container() {
-            public void paint(Graphics g) {
-                ((Graphics2D)g).addRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
-                g.setColor(Color.WHITE);
-                g.setFont(g.getFont().deriveFont(height / 12f));
-
-                g.fillRect(Main.width / 200, lPaddlePos, Main.width / 40, Main.height / 3);
-                g.fillRect(Main.width - Main.width / 200 - Main.width / 40, rPaddlePos, Main.width / 40, Main.height / 3);
-                g.fillOval(ballPos[0], ballPos[1], Main.height / 16, Main.height / 16);
-                Rectangle2D textBox = g.getFontMetrics().getStringBounds(score[0] + "   –   " + score[1], g);
-                g.drawString(score[0] + "   –   " + score[1], Main.width / 2 - textBox.getWidth() / 2, textBox.getHeight());
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                update();
+                panel.repaint();
+                if (score[0] == 10 || score[1] == 10) timer.cancel();
             }
-        });
+        }, 0, 10);
     }
-    private static void updateBallPosition() {
-        ballPos[0] += (int)ballVelocity[0];
-        ballPos[1] += (int)ballVelocity[1];
-    }
-    public static void gameLoop(JFrame frame) {
-        drawScreen(frame);
-        while (true) {
-            frame.repaint();
+
+    private void update() {
+        if (ballPos[1] < 0 || ballPos[1] > height - height / 32) {
+            ballVelocity[1] = -ballVelocity[1];
         }
+        if (ballPos[0] < height / 64 && ballPos[1] > lPaddlePos - height / 32 && ballPos[1] < lPaddlePos + height / 5) {  // TODO fix
+            double degrees = ((ballPos[1] - lPaddlePos + height / 32d) / (height / 10d)) * 45;
+            ballVelocity[0] *= -Math.cos(Math.toRadians(degrees));
+            ballVelocity[1] *= Math.sin(Math.toRadians(degrees));
+//            ballVelocity[0] = -ballVelocity[0];
+        }
+        if (ballPos[0] > width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
+            ballVelocity[0] = -ballVelocity[0];
+        }
+        if (ballPos[0] < 0) {
+            score[1]++;
+            ballPos = new int[] {width / 2 - height / 32, height / 2 - height / 32};
+            ballVelocity = new double[] {-5, 0};
+        }
+        if (ballPos[0] > width - height / 32) {
+            score[0]++;
+            ballPos = new int[] {width / 2 - height / 32, height / 2 - height / 32};
+            ballVelocity = new double[] {5, 0};
+        }
+        ballPos[0] += ballVelocity[0];
+        ballPos[1] += ballVelocity[1];
     }
-}
-
-class Game {
-
 }
