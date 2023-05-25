@@ -21,11 +21,12 @@ class Game {
     private int lPaddlePos = 2 * height / 5;
     private int rPaddlePos = 2 * height / 5;
     private int[] ballPos = new int[] {width / 2 - height / 64, height / 2 - height / 64};
-    private double[] ballVelocity = new double[] {-5, 0};
+    private double[] ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
     private int[] score = new int[] {0, 0};
     private JFrame frame;
     private JPanel panel;
     public Game() {
+        System.out.println(ballVelocity[1]);
         frame = new JFrame("Pong");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
@@ -84,11 +85,10 @@ class Game {
         if (ballPos[1] < 0 || ballPos[1] > height - height / 32) {
             ballVelocity[1] = -ballVelocity[1];
         }
-        if (ballPos[0] < height / 64 && ballPos[1] > lPaddlePos - height / 32 && ballPos[1] < lPaddlePos + height / 5) {  // TODO fix
-            double degrees = ((ballPos[1] - lPaddlePos + height / 32d) / (height / 10d)) * 45;
-            ballVelocity[0] *= -Math.cos(Math.toRadians(degrees));
-            ballVelocity[1] *= Math.sin(Math.toRadians(degrees));
-//            ballVelocity[0] = -ballVelocity[0];
+        if (ballPos[0] < height / 64 && ballPos[1] > lPaddlePos - height / 32 && ballPos[1] < lPaddlePos + height / 5) {
+            double angle = Math.toRadians(45 + ((ballPos[1] - lPaddlePos + height / 64) / (height / 5d)) * 90);
+            ballVelocity[0] *= -Math.sin(angle);
+            ballVelocity[1] *= Math.cos(angle);
         }
         if (ballPos[0] > width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
             ballVelocity[0] = -ballVelocity[0];
@@ -96,12 +96,12 @@ class Game {
         if (ballPos[0] < 0) {
             score[1]++;
             ballPos = new int[] {width / 2 - height / 32, height / 2 - height / 32};
-            ballVelocity = new double[] {-5, 0};
+            ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
         }
         if (ballPos[0] > width - height / 32) {
             score[0]++;
             ballPos = new int[] {width / 2 - height / 32, height / 2 - height / 32};
-            ballVelocity = new double[] {5, 0};
+            ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
         }
         ballPos[0] += ballVelocity[0];
         ballPos[1] += ballVelocity[1];
