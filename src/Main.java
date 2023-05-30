@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.Timer;
 
@@ -9,23 +10,27 @@ public class Main {
 
     public static void main(String[] args) {
         new Game();
+        ArrayList<Game> a = new ArrayList<>();
     }
 
 }
 
 class Game {
     private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    public int height = (int)screenSize.getHeight();
-    public int width = (int)screenSize.getWidth();
+    public int height = (int) screenSize.getHeight();
+    public int width = (int) screenSize.getWidth();
     private int lPaddlePos = 2 * height / 5;
     private int rPaddlePos = 2 * height / 5;
-    private int[] ballPos = new int[] {width / 2 - height / 64, height / 2 - height / 64};
-    private double[] ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
-    private int[] score = new int[] {0, 0};
+    private int[] ballPos = new int[]{width / 2 - height / 64, height / 2 - height / 64};
+//    private double[] ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
+    private double[] ballVelocity = new double[]{-5, 0};
+    private int speed = 5;
+
+    private int[] score = new int[]{0, 0};
     private JFrame frame;
     private JPanel panel;
+
     public Game() {
-        System.out.println(ballVelocity[1]);
         frame = new JFrame("Pong");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
@@ -53,7 +58,7 @@ class Game {
             public void keyPressed(java.awt.event.KeyEvent e) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_UP:
-                         lPaddlePos -= 10;
+                        lPaddlePos -= 10;
                         break;
                     case KeyEvent.VK_DOWN:
                         lPaddlePos += 10;
@@ -84,23 +89,29 @@ class Game {
         if (ballPos[1] < 0 || ballPos[1] > height - height / 32) {
             ballVelocity[1] = -ballVelocity[1];
         }
-        if (ballPos[0] < height / 64 && ballPos[1] > lPaddlePos - height / 32 && ballPos[1] < lPaddlePos + height / 5) {
-            double angle = Math.toRadians(45 + ((ballPos[1] - lPaddlePos + height / 64) / (height / 5d)) * 90);
-            ballVelocity[0] *= -Math.sin(angle);
-            ballVelocity[1] *= Math.cos(angle);
+        if ((ballPos[0] < height / 64) && ballPos[1] > lPaddlePos - height / 32 && ballPos[1] < lPaddlePos + height / 5) {
+            double angle = Math.toRadians(-(90 + ((((ballPos[1] - lPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
+            ballVelocity[0] = -speed * Math.sin(angle);
+            ballVelocity[1] = -speed * Math.cos(angle);
+            if (speed < 100) speed++;
         }
-        if (ballPos[0] > width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
-            ballVelocity[0] = -ballVelocity[0];
+        else if (ballPos[0] > width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
+            double angle = Math.toRadians(-(90 + ((((ballPos[1] - rPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
+            ballVelocity[0] = speed * Math.sin(angle);
+            ballVelocity[1] = -speed * Math.cos(angle);
+            if (speed < 100) speed++;
         }
-        if (ballPos[0] < 0) {
+        else if (ballPos[0] < 0) {
             score[1]++;
-            ballPos = new int[] {width / 2 - height / 32, height / 2 - height / 32};
-            ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
+            ballPos = new int[]{width / 2 - height / 32, height / 2 - height / 32};
+            ballVelocity = new double[]{-5, (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
+            speed = 5;
         }
-        if (ballPos[0] > width - height / 32) {
+        else if (ballPos[0] > width - height / 32) {
             score[0]++;
-            ballPos = new int[] {width / 2 - height / 32, height / 2 - height / 32};
-            ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
+            ballPos = new int[]{width / 2 - height / 32, height / 2 - height / 32};
+            ballVelocity = new double[]{5, (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
+            speed = 5;
         }
         ballPos[0] += ballVelocity[0];
         ballPos[1] += ballVelocity[1];
