@@ -71,6 +71,8 @@ class Game {
                     case KeyEvent.VK_S:
                         rPaddlePos += 10;
                         break;
+                    case KeyEvent.VK_ESCAPE:
+                        System.exit(0);
                 }
             }
         });
@@ -89,13 +91,14 @@ class Game {
         if (ballPos[1] < 0 || ballPos[1] > height - height / 32) {
             ballVelocity[1] = -ballVelocity[1];
         }
-        if ((ballPos[0] < height / 64) && ballPos[1] > lPaddlePos - height / 32 && ballPos[1] < lPaddlePos + height / 5) {
+        if ((ballPos[0] <= height / 64) && ballPos[1] > lPaddlePos - height / 32 && ballPos[1] < lPaddlePos + height / 5) {
             double angle = Math.toRadians(-(90 + ((((ballPos[1] - lPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
             ballVelocity[0] = -speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
+
         }
-        else if (ballPos[0] > width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
+        else if (ballPos[0] >= width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
             double angle = Math.toRadians(-(90 + ((((ballPos[1] - rPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
             ballVelocity[0] = speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
