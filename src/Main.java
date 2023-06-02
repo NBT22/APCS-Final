@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.TimerTask;
 import java.util.Timer;
 
@@ -87,6 +88,18 @@ class Game {
         }, 0, 10);
     }
 
+    /**
+     * Uses a racast to calculate the position of the ball when it gets to the other side of the screen
+     */
+    private double[] calculatePosition() {
+        double[] pos = new double[]{ballPos[0] + ballVelocity[0], ballPos[1] + ballVelocity[1]};
+        while (pos[0] < width - height / 64 - height / 32 && pos[0] > height / 64) {
+            pos[0] += ballVelocity[0];
+            pos[1] += pos[1] > height - height / 32 || pos[1] < 0 ? -ballVelocity[1] : ballVelocity[1];
+        }
+        return pos;
+    }
+
     private void update() {
         if (ballPos[1] < 0 || ballPos[1] > height - height / 32) {
             ballVelocity[1] = -ballVelocity[1];
@@ -96,13 +109,16 @@ class Game {
             ballVelocity[0] = -speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-
+            System.out.println(Arrays.toString(ballPos));
+            System.out.println(Arrays.toString(calculatePosition()));
         }
         else if (ballPos[0] >= width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
             double angle = Math.toRadians(-(90 + ((((ballPos[1] - rPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
             ballVelocity[0] = speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
+            System.out.println(Arrays.toString(ballPos));
+            System.out.println(Arrays.toString(calculatePosition()));
         }
         else if (ballPos[0] < 0) {
             score[1]++;
