@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,11 +9,11 @@ public class Game {
     private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     public int height = (int) screenSize.getHeight();
     public int width = (int) screenSize.getWidth();
-    private int lPaddlePos = 2 * height / 5;
-    private int rPaddlePos = 2 * height / 5;
+    private int lPaddlePos;
+    private int rPaddlePos;
     private int[] ballPos = new int[]{width / 2 - height / 64, height / 2 - height / 64};
-    //    private double[] ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
-    private double[] ballVelocity = new double[]{-5, 0};
+    private double[] ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), 0};
+//    private double[] ballVelocity = new double[]{-5, 0};
     private int speed = 5;
 
     private int[] score = new int[]{0, 0};
@@ -22,6 +21,7 @@ public class Game {
     private JPanel panel;
 
     public Game() {
+        positionPaddles();
         frame = new JFrame("Pong");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
@@ -72,11 +72,17 @@ public class Game {
             public void run() {
                 update();
                 panel.repaint();
-                if (score[0] == 10 || score[1] == 10) timer.cancel();
+                if (score[0] == 3 || score[1] == 3) {
+                    timer.cancel();
+                    endGame(score[0] == 3 ? 1 : 2);
+                }
             }
         }, 0, 10);
     }
-
+    private void endGame(int winner) {
+        GameOver.main(new String[]{Integer.toString(winner)});
+        frame.dispose();
+    }
     private int[] calculatePosition() {
         double[] velocity = new double[]{ballVelocity[0], ballVelocity[1]};
         int[] pos = new int[]{ballPos[0], ballPos[1]};
@@ -101,30 +107,41 @@ public class Game {
             ballVelocity[0] = -speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-            System.out.println(Arrays.toString(ballPos));
-            System.out.println(Arrays.toString(calculatePosition()));
+            rPaddlePos = calculatePosition()[1] - (int)(Math.random() * (height / 5)) + height / 64;
         }
         else if (ballPos[0] >= width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
             double angle = Math.toRadians(-(90 + ((((ballPos[1] - rPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
             ballVelocity[0] = speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-            System.out.println(Arrays.toString(ballPos));
-            System.out.println(Arrays.toString(calculatePosition()));
+            lPaddlePos = calculatePosition()[1] - (int)(Math.random() * (height / 5)) + height / 64;
         }
         else if (ballPos[0] < 0) {
             score[1]++;
             ballPos = new int[]{width / 2 - height / 32, height / 2 - height / 32};
             speed = 5;
             ballVelocity = new double[]{-speed, (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
+            positionPaddles();
         }
         else if (ballPos[0] > width - height / 32) {
             score[0]++;
             ballPos = new int[]{width / 2 - height / 32, height / 2 - height / 32};
             speed = 5;
             ballVelocity = new double[]{speed, (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
+            positionPaddles();
         }
         ballPos[0] += ballVelocity[0];
         ballPos[1] += ballVelocity[1];
+    }
+
+    private void positionPaddles() {
+        int[] pos = calculatePosition();
+        if (pos[0] < width / 2) {
+            lPaddlePos = pos[1] - (int)(Math.random() * (height / 5)) + height / 64;
+            rPaddlePos = 2 * height / 5;
+        } else {
+            lPaddlePos = 2 * height / 5;
+            rPaddlePos = pos[1] - (int)(Math.random() * (height / 5)) + height / 64;
+        }
     }
 }

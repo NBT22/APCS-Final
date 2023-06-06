@@ -44,8 +44,9 @@ public class MainMenu extends JFrame {
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new Game();
-                dispose();
+//                new Game();
+                GameOver.main(new String[]{"1"});
+//                dispose();
             }
         });
         settingsButton.addActionListener(new ActionListener() {
