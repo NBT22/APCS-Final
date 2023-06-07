@@ -32,8 +32,7 @@ public class MainMenu extends JFrame {
         super(name);
         $$$setupUI$$$();
         playButton.addActionListener(e -> {
-//            new Game(Settings.loadSettings().players);
-            GameOver.main(new String[]{"1"});
+            new Game(Settings.loadSettings().players);
             dispose();
         });
         settingsButton.addActionListener(e -> Settings.main(new String[]{}));
