@@ -12,7 +12,7 @@ public class Game {
     private int lPaddlePos;
     private int rPaddlePos;
     private int[] ballPos = new int[]{width / 2 - height / 64, height / 2 - height / 64};
-    private double[] ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
+    private double[] ballVelocity = new double[]{(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
     private int speed = 5;
     private final int[] score = new int[]{0, 0};
     private final int players;
@@ -86,10 +86,12 @@ public class Game {
             }
         }, 0, 10);
     }
+
     private void endGame(int winner) {
         GameOver.main(new String[]{Integer.toString(winner)});
         frame.dispose();
     }
+
     private int[] calculatePosition() {
         double[] velocity = new double[]{ballVelocity[0], ballVelocity[1]};
         int[] pos = new int[]{ballPos[0], ballPos[1]};
@@ -117,23 +119,20 @@ public class Game {
             ballVelocity[0] = -speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-            if (players < 2) rPaddlePos = calculatePosition()[1] - (int)(Math.random() * (height / 5)) + height / 64;
-        }
-        else if (ballPos[0] >= width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
+            if (players < 2) rPaddlePos = calculatePosition()[1] - (int) (Math.random() * (height / 5)) + height / 64;
+        } else if (ballPos[0] >= width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
             double angle = Math.toRadians(-(90 + ((((ballPos[1] - rPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
             ballVelocity[0] = speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-            if (players == 0) lPaddlePos = calculatePosition()[1] - (int)(Math.random() * (height / 5)) + height / 64;
-        }
-        else if (ballPos[0] < 0) {
+            if (players == 0) lPaddlePos = calculatePosition()[1] - (int) (Math.random() * (height / 5)) + height / 64;
+        } else if (ballPos[0] < 0) {
             score[1]++;
             ballPos = new int[]{width / 2 - height / 32, height / 2 - height / 32};
             speed = 5;
             ballVelocity = new double[]{-speed, (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
             positionPaddles();
-        }
-        else if (ballPos[0] > width - height / 32) {
+        } else if (ballPos[0] > width - height / 32) {
             score[0]++;
             ballPos = new int[]{width / 2 - height / 32, height / 2 - height / 32};
             speed = 5;
@@ -147,11 +146,11 @@ public class Game {
     private void positionPaddles() {
         int[] pos = calculatePosition();
         if (pos[0] < width / 2) {
-            lPaddlePos = players == 0 ? pos[1] - (int)(Math.random() * (height / 5)) + height / 64 : 2 * height / 5;
+            lPaddlePos = players == 0 ? pos[1] - (int) (Math.random() * (height / 5)) + height / 64 : 2 * height / 5;
             rPaddlePos = 2 * height / 5;
         } else {
             lPaddlePos = 2 * height / 5;
-            rPaddlePos = players < 2 ? pos[1] - (int)(Math.random() * (height / 5)) + height / 64 : 2 * height / 5;
+            rPaddlePos = players < 2 ? pos[1] - (int) (Math.random() * (height / 5)) + height / 64 : 2 * height / 5;
         }
     }
 }
