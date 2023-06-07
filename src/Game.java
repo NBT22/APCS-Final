@@ -11,8 +11,11 @@ public class Game {
     public int width = (int) screenSize.getWidth();
     private int lPaddlePos;
     private int rPaddlePos;
+    private final int[] lPaddleTarget;
+    private final int[] rPaddleTarget;
+    private final int paddleSpeed = Settings.loadSettings().speed;
     private int[] ballPos = new int[]{width / 2 - height / 64, height / 2 - height / 64};
-    private double[] ballVelocity = new double[]{(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
+    private double[] ballVelocity;
     private int speed = 5;
     private final int[] score = new int[]{0, 0};
     private final int players;
@@ -21,7 +24,10 @@ public class Game {
 
     public Game(int players) {
         this.players = players;
+        ballVelocity = new double[]{players == 1 ? -5 : (Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
         positionPaddles();
+        lPaddleTarget = new int[]{0, lPaddlePos};
+        rPaddleTarget = new int[]{0, rPaddlePos};
         frame = new JFrame("Pong");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
@@ -119,13 +125,21 @@ public class Game {
             ballVelocity[0] = -speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-            if (players < 2) rPaddlePos = calculatePosition()[1] - (int) (Math.random() * (height / 5)) + height / 64;
+            if (players < 2) {
+                rPaddleTarget[1] = calculatePosition()[1] - (int) (Math.random() * (height / 5)) + height / 64;
+                if (rPaddleTarget[1] < rPaddlePos) rPaddleTarget[0] = 0;
+                else rPaddleTarget[0] = 1;
+            }
         } else if (ballPos[0] >= width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
             double angle = Math.toRadians(-(90 + ((((ballPos[1] - rPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
             ballVelocity[0] = speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-            if (players == 0) lPaddlePos = calculatePosition()[1] - (int) (Math.random() * (height / 5)) + height / 64;
+            if (players == 0) {
+                lPaddleTarget[1] = calculatePosition()[1] - (int) (Math.random() * (height / 5)) + height / 64;
+                if (lPaddleTarget[1] < lPaddlePos) lPaddleTarget[0] = 0;
+                else lPaddleTarget[0] = 1;
+            }
         } else if (ballPos[0] < 0) {
             score[1]++;
             ballPos = new int[]{width / 2 - height / 32, height / 2 - height / 32};
@@ -136,8 +150,38 @@ public class Game {
             score[0]++;
             ballPos = new int[]{width / 2 - height / 32, height / 2 - height / 32};
             speed = 5;
-            ballVelocity = new double[]{speed, (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
+            ballVelocity = new double[]{(players == 1 ? -speed : speed), (Math.random() > 0.5 ? (int) (Math.random() * 2) + 1 : (int) (Math.random() * 2) - 2)};
             positionPaddles();
+        }
+        if (rPaddleTarget[1] != rPaddlePos && players < 2) {
+            if (rPaddleTarget[0] == 0) {
+                if (rPaddleTarget[1] < rPaddlePos) {
+                    if (paddleSpeed >= 100) rPaddlePos = rPaddleTarget[1];
+                    else rPaddlePos -= (10 * paddleSpeed) / (200 - speed);
+                }
+                else rPaddlePos = rPaddleTarget[1];
+            } else if (rPaddleTarget[0] == 1) {
+                if (rPaddleTarget[1] > rPaddlePos) {
+                    if (paddleSpeed >= 100) rPaddlePos = rPaddleTarget[1];
+                    else rPaddlePos += (10 * paddleSpeed) / (200 - speed);
+                }
+                else rPaddlePos = rPaddleTarget[1];
+            }
+        }
+        if (lPaddleTarget[1] != lPaddlePos && players == 0) {
+            if (lPaddleTarget[0] == 0) {
+                if (lPaddleTarget[1] < lPaddlePos) {
+                    if (paddleSpeed >= 100) lPaddlePos = lPaddleTarget[1];
+                    else lPaddlePos -= (10 * paddleSpeed) / (200 - speed);
+                }
+                else lPaddlePos = lPaddleTarget[1];
+            } else if (lPaddleTarget[0] == 1) {
+                if (lPaddleTarget[1] > lPaddlePos) {
+                    if (paddleSpeed >= 100) lPaddlePos = lPaddleTarget[1];
+                    else lPaddlePos += (10 * paddleSpeed) / (200 - speed);
+                }
+                else lPaddlePos = lPaddleTarget[1];
+            }
         }
         ballPos[0] += ballVelocity[0];
         ballPos[1] += ballVelocity[1];
