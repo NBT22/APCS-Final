@@ -12,15 +12,15 @@ public class Game {
     private int lPaddlePos;
     private int rPaddlePos;
     private int[] ballPos = new int[]{width / 2 - height / 64, height / 2 - height / 64};
-    private double[] ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), 0};
-//    private double[] ballVelocity = new double[]{-5, 0};
+    private double[] ballVelocity = new double[] {(Math.random() > 0.5 ? 5 : -5), (Math.random() > 0.5 ? (int)(Math.random() * 2) + 1 : (int)(Math.random() * 2) - 2)};
     private int speed = 5;
+    private final int[] score = new int[]{0, 0};
+    private final int players;
+    private final JFrame frame;
+    private final JPanel panel;
 
-    private int[] score = new int[]{0, 0};
-    private JFrame frame;
-    private JPanel panel;
-
-    public Game() {
+    public Game(int players) {
+        this.players = players;
         positionPaddles();
         frame = new JFrame("Pong");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -44,37 +44,44 @@ public class Game {
         };
         panel.setBackground(Color.BLACK);
         frame.add(panel);
-        frame.addKeyListener(new KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP:
-                        lPaddlePos -= 10;
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        lPaddlePos += 10;
-                        break;
-                    case KeyEvent.VK_PAGE_UP:
-                    case KeyEvent.VK_W:
-                        rPaddlePos -= 10;
-                        break;
-                    case KeyEvent.VK_PAGE_DOWN:
-                    case KeyEvent.VK_S:
-                        rPaddlePos += 10;
-                        break;
-                    case KeyEvent.VK_ESCAPE:
+        switch (players) {
+            case 0 -> frame.addKeyListener(new KeyAdapter() {
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                         System.exit(0);
+                    }
                 }
-            }
-        });
+            });
+            case 1 -> frame.addKeyListener(new KeyAdapter() {
+                public void keyPressed(KeyEvent e) {
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_UP -> lPaddlePos -= 10;
+                        case KeyEvent.VK_DOWN -> lPaddlePos += 10;
+                        case KeyEvent.VK_ESCAPE -> System.exit(0);
+                    }
+                }
+            });
+            default -> frame.addKeyListener(new KeyAdapter() {
+                public void keyPressed(KeyEvent e) {
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_UP -> lPaddlePos -= 10;
+                        case KeyEvent.VK_DOWN -> lPaddlePos += 10;
+                        case KeyEvent.VK_PAGE_UP, KeyEvent.VK_W -> rPaddlePos -= 10;
+                        case KeyEvent.VK_PAGE_DOWN, KeyEvent.VK_S -> rPaddlePos += 10;
+                        case KeyEvent.VK_ESCAPE -> System.exit(0);
+                    }
+                }
+            });
+        }
         java.util.Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 update();
                 panel.repaint();
-                if (score[0] == 3 || score[1] == 3) {
+                if (score[0] == 10 || score[1] == 10) {
                     timer.cancel();
-                    endGame(score[0] == 3 ? 1 : 2);
+                    endGame(score[0] == 10 ? 1 : 2);
                 }
             }
         }, 0, 10);
@@ -99,6 +106,9 @@ public class Game {
     }
 
     private void update() {
+        if (players == 1) {
+            lPaddlePos = MouseInfo.getPointerInfo().getLocation().y - height / 10;
+        }
         if (ballPos[1] < 0 || ballPos[1] > height - height / 32) {
             ballVelocity[1] *= -1;
         }
@@ -107,14 +117,14 @@ public class Game {
             ballVelocity[0] = -speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-            rPaddlePos = calculatePosition()[1] - (int)(Math.random() * (height / 5)) + height / 64;
+            if (players < 2) rPaddlePos = calculatePosition()[1] - (int)(Math.random() * (height / 5)) + height / 64;
         }
         else if (ballPos[0] >= width - height / 64 - height / 32 && ballPos[1] > rPaddlePos - height / 32 && ballPos[1] < rPaddlePos + height / 5) {
             double angle = Math.toRadians(-(90 + ((((ballPos[1] - rPaddlePos + height / 64) / (height / 5d)) - 0.5) * 90)));
             ballVelocity[0] = speed * Math.sin(angle);
             ballVelocity[1] = -speed * Math.cos(angle);
             if (speed < 100) speed++;
-            lPaddlePos = calculatePosition()[1] - (int)(Math.random() * (height / 5)) + height / 64;
+            if (players == 0) lPaddlePos = calculatePosition()[1] - (int)(Math.random() * (height / 5)) + height / 64;
         }
         else if (ballPos[0] < 0) {
             score[1]++;
@@ -137,11 +147,11 @@ public class Game {
     private void positionPaddles() {
         int[] pos = calculatePosition();
         if (pos[0] < width / 2) {
-            lPaddlePos = pos[1] - (int)(Math.random() * (height / 5)) + height / 64;
+            lPaddlePos = players == 0 ? pos[1] - (int)(Math.random() * (height / 5)) + height / 64 : 2 * height / 5;
             rPaddlePos = 2 * height / 5;
         } else {
             lPaddlePos = 2 * height / 5;
-            rPaddlePos = pos[1] - (int)(Math.random() * (height / 5)) + height / 64;
+            rPaddlePos = players < 2 ? pos[1] - (int)(Math.random() * (height / 5)) + height / 64 : 2 * height / 5;
         }
     }
 }

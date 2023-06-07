@@ -8,7 +8,6 @@ import java.util.Scanner;
 public class Settings extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
-    private JComboBox comboBox1;
     private JSlider speedSlider;
     private JButton buttonApply;
     private JRadioButton onePlayerRadioButton;
@@ -20,11 +19,7 @@ public class Settings extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        buttonOK.addActionListener(e -> onOK());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -35,17 +30,8 @@ public class Settings extends JDialog {
         });
 
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        buttonApply.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveSettings();
-            }
-        });
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        buttonApply.addActionListener(e -> saveSettings());
     }
 
     private void createUIComponents() {
@@ -62,7 +48,7 @@ public class Settings extends JDialog {
         speedSlider.setValue(settings.speed);
     }
 
-    private static class Config {
+    public static class Config {
         public int players;
         public int speed;
 
@@ -80,7 +66,7 @@ public class Settings extends JDialog {
         }
     }
 
-    private Config loadSettings() {
+    public static Config loadSettings() {
         try {
             Scanner scanner = new Scanner(new File("settings"));
             return new Config(scanner.nextInt(), scanner.nextInt());

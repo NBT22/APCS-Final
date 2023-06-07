@@ -4,8 +4,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Locale;
 
 public class MainMenu extends JFrame {
@@ -15,7 +13,7 @@ public class MainMenu extends JFrame {
 
     private static class RoundedBorder implements Border {
 
-        private int radius;
+        private final int radius;
 
 
         RoundedBorder(int radius) {
@@ -41,20 +39,11 @@ public class MainMenu extends JFrame {
     public MainMenu(String name) {
         super(name);
         $$$setupUI$$$();
-        playButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-//                new Game();
-                GameOver.main(new String[]{"1"});
-//                dispose();
-            }
+        playButton.addActionListener(e -> {
+            new Game(Settings.loadSettings().players);
+            dispose();
         });
-        settingsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Settings.main(new String[]{});
-            }
-        });
+        settingsButton.addActionListener(e -> Settings.main(new String[]{}));
     }
 
     public static void main(String[] args) {
